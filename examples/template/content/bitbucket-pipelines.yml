@@ -1,0 +1,18 @@
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+pipelines:
+  default:
+    - step:
+        name: Build & Test Orders.Api
+        script:
+          - export serviceName="{{ parameters.name }}"   # 👈 Parameterize
+          - dotnet restore
+          - dotnet build --configuration Release
+          - dotnet test --no-build --configuration Release
+
+    - step:
+        name: Package Orders.Api
+        script:
+          - dotnet publish $serviceName -c Release -o ./publish
+        artifacts:
+          - publish/**

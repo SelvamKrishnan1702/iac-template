@@ -2,9 +2,9 @@ apiVersion: scaffolder.backstage.io/v1beta3
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-template
 kind: Template
 metadata:
-  name: example-nodejs-template
-  title: Example Node.js Template
-  description: An example template for the scaffolder that creates a simple Node.js service
+  name: api-service-template 
+  title: API Service Template
+  description: Backstage API Template for Rapid .NET Steel Thread Delivery
 spec:
   owner: user:guest
   type: service
@@ -12,17 +12,29 @@ spec:
   # These parameters are used to generate the input form in the frontend, and are
   # used to gather input data for the execution of the template.
   parameters:
-    - title: Fill in some steps
+    - title: Component Information
       required:
         - name
+        - businessUnit
+        - sourceType
       properties:
         name:
-          title: Name
+          title: Service Name
           type: string
           description: Unique name of the component
           ui:autofocus: true
           ui:options:
             rows: 5
+        businessUnit:
+          type: string
+          title: Business Unit
+          enum: [Customer, Gas, Electric, Group Functions]
+        sourceType:
+          type: string
+          title: If Migrated, select kind
+          enum: [PAPI, SAPI, EAPI, Proxy]
+          default: PAPI
+
     - title: Choose a location
       required:
         - repoUrl
@@ -58,13 +70,13 @@ spec:
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: 'main'
 
-    # The final step is to register our new component in the catalog.
+    # The final step is to register our new component in the catalog.repoContentsUrl
     - id: register
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+        catalogInfoUrl: ${{ steps['publish'].output.remoteUrl | replace(".git","") }}/blob/main/catalog-info.yaml
+        #catalogInfoPath: '/catalog-info.yaml'
 
     # Let's notify the user that the template has completed using the Notification action
     - id: notify

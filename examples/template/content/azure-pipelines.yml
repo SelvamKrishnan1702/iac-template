@@ -1,0 +1,35 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  serviceName: "__name__"   # 👈 placeholder
+  buildConfiguration: "Release"
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '8.x'
+
+  - script: dotnet restore
+    displayName: "Restore dependencies"
+
+  - script: dotnet build --configuration $(buildConfiguration)
+    displayName: "Build $(serviceName)"
+
+  - script: dotnet test --no-build --configuration $(buildConfiguration) --verbosity normal
+    displayName: "Run tests for $(serviceName)"
+
+  - script: dotnet publish $(serviceName) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)
+    displayName: "Publish artifact"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: "$(Build.ArtifactStagingDirectory)"
+      artifactName: "$(serviceName)-artifact"
+      publishLocation: "Container"
